@@ -235,7 +235,10 @@ const Index: React.FC = () => {
                         {formatDate(launch.net)}
                       </p>
                       <p className="text-gray-300 text-sm leading-relaxed">
-                        {launch.mission?.description?.substring(0, 150)}...
+                        {typeof launch.mission?.description === 'string' 
+                          ? launch.mission.description.substring(0, 150) + '...'
+                          : 'Mission details not available'
+                        }
                       </p>
                     </div>
                   </div>
