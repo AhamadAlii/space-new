@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Rocket, Satellite, Globe, Calendar, ExternalLink, Star } from 'lucide-react';
+import { Rocket, Globe, Calendar, ExternalLink, Star } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,21 +16,8 @@ interface NewsArticle {
   url: string;
 }
 
-interface Launch {
-  id: string;
-  name: string;
-  status: string;
-  net: string;
-  image: string;
-  mission: {
-    description: string;
-    type: string;
-  };
-}
-
 const Index: React.FC = () => {
   const [news, setNews] = useState<NewsArticle[]>([]);
-  const [launches, setLaunches] = useState<Launch[]>([]);
   const [apod, setApod] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -47,11 +34,6 @@ const Index: React.FC = () => {
       const newsResponse = await fetch('https://api.spaceflightnewsapi.net/v4/articles/?limit=12');
       const newsData = await newsResponse.json();
       setNews(newsData.results || []);
-      
-      // Fetch upcoming launches
-      const launchResponse = await fetch('https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=6');
-      const launchData = await launchResponse.json();
-      setLaunches(launchData.results || []);
       
       // Fetch NASA Astronomy Picture of the Day
       const apodResponse = await fetch('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY');
@@ -155,98 +137,49 @@ const Index: React.FC = () => {
           </section>
         )}
 
-        {/* Content Tabs */}
-        <Tabs defaultValue="news" className="space-y-6">
-          <TabsList className="bg-slate-800/50 border border-purple-500/20">
-            <TabsTrigger value="news" className="data-[state=active]:bg-purple-600">
-              Latest News
-            </TabsTrigger>
-            <TabsTrigger value="launches" className="data-[state=active]:bg-purple-600">
-              Upcoming Launches
-            </TabsTrigger>
-          </TabsList>
-
-          {/* News Tab */}
-          <TabsContent value="news">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {news.map((article) => (
-                <Card key={article.id} className="bg-slate-800/50 border-purple-500/20 backdrop-blur-sm hover:bg-slate-800/70 transition-all duration-300 group">
-                  <div className="relative overflow-hidden">
-                    <img 
-                      src={article.image_url} 
-                      alt={article.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-4 right-4">
-                      <span className="bg-blue-500/80 text-white px-2 py-1 rounded text-xs font-medium">
-                        {article.news_site}
-                      </span>
-                    </div>
+        {/* News Section */}
+        <section>
+          <h2 className="text-3xl font-bold text-white mb-8">Latest Space News</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {news.map((article) => (
+              <Card key={article.id} className="bg-slate-800/50 border-purple-500/20 backdrop-blur-sm hover:bg-slate-800/70 transition-all duration-300 group">
+                <div className="relative overflow-hidden">
+                  <img 
+                    src={article.image_url} 
+                    alt={article.title}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute top-4 right-4">
+                    <span className="bg-blue-500/80 text-white px-2 py-1 rounded text-xs font-medium">
+                      {article.news_site}
+                    </span>
                   </div>
-                  <CardHeader>
-                    <CardTitle className="text-white text-lg leading-tight">{article.title}</CardTitle>
-                    <CardDescription className="text-gray-400 flex items-center space-x-2">
-                      <Calendar className="w-4 h-4" />
-                      <span>{formatDate(article.published_at)}</span>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-300 text-sm mb-4 leading-relaxed">
-                      {article.summary.substring(0, 120)}...
-                    </p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="border-purple-500/50 text-purple-300 hover:bg-purple-500/20"
-                      onClick={() => window.open(article.url, '_blank')}
-                    >
-                      Read More
-                      <ExternalLink className="w-4 h-4 ml-2" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Launches Tab */}
-          <TabsContent value="launches">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {launches.map((launch) => (
-                <Card key={launch.id} className="bg-slate-800/50 border-purple-500/20 backdrop-blur-sm hover:bg-slate-800/70 transition-all duration-300">
-                  <div className="flex gap-4 p-6">
-                    <div className="flex-shrink-0">
-                      <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center">
-                        <Satellite className="w-8 h-8 text-white" />
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-lg font-bold text-white">{launch.name}</h3>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          launch.status === 'Go' ? 'bg-green-500/20 text-green-300' : 
-                          launch.status === 'TBD' ? 'bg-yellow-500/20 text-yellow-300' :
-                          'bg-gray-500/20 text-gray-300'
-                        }`}>
-                          {launch.status}
-                        </span>
-                      </div>
-                      <p className="text-gray-400 text-sm mb-2">
-                        {formatDate(launch.net)}
-                      </p>
-                      <p className="text-gray-300 text-sm leading-relaxed">
-                        {typeof launch.mission?.description === 'string' 
-                          ? launch.mission.description.substring(0, 150) + '...'
-                          : 'Mission details not available'
-                        }
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
+                </div>
+                <CardHeader>
+                  <CardTitle className="text-white text-lg leading-tight">{article.title}</CardTitle>
+                  <CardDescription className="text-gray-400 flex items-center space-x-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>{formatDate(article.published_at)}</span>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-300 text-sm mb-4 leading-relaxed">
+                    {article.summary.substring(0, 120)}...
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="border-purple-500/50 text-purple-300 hover:bg-purple-500/20"
+                    onClick={() => window.open(article.url, '_blank')}
+                  >
+                    Read More
+                    <ExternalLink className="w-4 h-4 ml-2" />
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
       </main>
 
       {/* Footer */}
