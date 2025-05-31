@@ -28,7 +28,7 @@ interface Launch {
   };
 }
 
-const Index = () => {
+const Index: React.FC = () => {
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [launches, setLaunches] = useState<Launch[]>([]);
   const [apod, setApod] = useState<any>(null);
